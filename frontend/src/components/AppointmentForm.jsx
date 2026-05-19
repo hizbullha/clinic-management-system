@@ -3,7 +3,6 @@ import { useAppointments } from '../context/useContextHooks';
 import { STATUS } from '../context/AuthTypes';
 import { X, Calendar, Clock, Clipboard, ChevronRight } from 'lucide-react';
 
-// 🟢 Base API URL (Railway / Production / Local via env)
 const API = import.meta.env.VITE_API_URL;
 
 const AppointmentForm = ({ onClose, existing }) => {
@@ -20,7 +19,6 @@ const AppointmentForm = ({ onClose, existing }) => {
     reason: existing ? existing.reason : '',
   });
 
-  // 🔹 FETCH DOCTORS
   useEffect(() => {
     const fetchSystemDoctors = async () => {
       const token = localStorage.getItem('clinic_jwt_token');
@@ -31,8 +29,8 @@ const AppointmentForm = ({ onClose, existing }) => {
         const response = await fetch(`${API}/api/auth/doctors`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         if (response.ok) {
@@ -40,15 +38,14 @@ const AppointmentForm = ({ onClose, existing }) => {
           setActiveDoctors(data);
 
           if (!existing && data.length > 0) {
-            setFormData(prev => ({
+            setFormData((prev) => ({
               ...prev,
-              doctorId: data[0].id
+              doctorId: data[0].id,
             }));
           }
         }
-
       } catch (err) {
-        console.error('Failed to fetch doctors:', err);
+        console.error('Failed to fetch doctors:', err.message);
       } finally {
         setLoadingDoctors(false);
       }
@@ -57,7 +54,6 @@ const AppointmentForm = ({ onClose, existing }) => {
     fetchSystemDoctors();
   }, [existing]);
 
-  // 🔹 SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -71,13 +67,13 @@ const AppointmentForm = ({ onClose, existing }) => {
       doctorId: parseInt(formData.doctorId, 10),
       reason: formData.reason,
       appointmentDate: formData.date,
-      appointmentTime: formData.time
+      appointmentTime: formData.time,
     };
 
     try {
       if (existing) {
         const result = await updateAppointmentStatus(existing.id, {
-          status: STATUS.COMPLETED
+          status: STATUS.COMPLETED,
         });
 
         if (result.success) onClose();
@@ -88,8 +84,7 @@ const AppointmentForm = ({ onClose, existing }) => {
         if (result.success) onClose();
         else setError(result.error || 'Booking failed');
       }
-
-    } catch (err) {
+    } catch {
       setError('Unexpected error occurred');
     }
   };
@@ -121,9 +116,13 @@ const AppointmentForm = ({ onClose, existing }) => {
 
         <form
           onSubmit={handleSubmit}
-          style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}
+          style={{
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '14px',
+          }}
         >
-
           {!existing && (
             <div className="form-group">
               <label className="form-label">Select Practitioner</label>
@@ -131,8 +130,8 @@ const AppointmentForm = ({ onClose, existing }) => {
               <select
                 className="form-control"
                 value={formData.doctorId}
-                onChange={e =>
-                  setFormData(p => ({ ...p, doctorId: e.target.value }))
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, doctorId: e.target.value }))
                 }
                 required
                 disabled={loadingDoctors}
@@ -140,7 +139,7 @@ const AppointmentForm = ({ onClose, existing }) => {
                 {loadingDoctors ? (
                   <option>Loading...</option>
                 ) : activeDoctors.length > 0 ? (
-                  activeDoctors.map(d => (
+                  activeDoctors.map((d) => (
                     <option key={d.id} value={d.id}>
                       {d.name}
                     </option>
@@ -152,20 +151,24 @@ const AppointmentForm = ({ onClose, existing }) => {
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '12px',
+            }}
+          >
             <div className="form-group">
               <label className="form-label">
                 <Calendar size={12} /> Date
               </label>
 
-              {/* 🔥 FIXED BUG: removed formData.formDataDate */}
               <input
                 type="date"
                 className="form-control"
                 value={formData.date}
-                onChange={e =>
-                  setFormData(p => ({ ...p, date: e.target.value }))
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, date: e.target.value }))
                 }
                 required
                 disabled={!!existing}
@@ -181,14 +184,13 @@ const AppointmentForm = ({ onClose, existing }) => {
                 type="time"
                 className="form-control"
                 value={formData.time}
-                onChange={e =>
-                  setFormData(p => ({ ...p, time: e.target.value }))
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, time: e.target.value }))
                 }
                 required
                 disabled={!!existing}
               />
             </div>
-
           </div>
 
           <div className="form-group">
@@ -200,8 +202,8 @@ const AppointmentForm = ({ onClose, existing }) => {
               type="text"
               className="form-control"
               value={formData.reason}
-              onChange={e =>
-                setFormData(p => ({ ...p, reason: e.target.value }))
+              onChange={(e) =>
+                setFormData((p) => ({ ...p, reason: e.target.value }))
               }
               required
               disabled={!!existing}
@@ -209,7 +211,6 @@ const AppointmentForm = ({ onClose, existing }) => {
           </div>
 
           <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-
             <button type="button" onClick={onClose} className="btn btn-ghost">
               Cancel
             </button>
@@ -224,9 +225,7 @@ const AppointmentForm = ({ onClose, existing }) => {
               </span>
               <ChevronRight size={16} />
             </button>
-
           </div>
-
         </form>
       </div>
     </div>
