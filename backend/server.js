@@ -25,17 +25,21 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow REST tools like Postman
+      // Allow REST tools like Postman (where origin is undefined)
       if (!origin) return callback(null, true);
 
-      // exact match check
-      if (allowedOrigins.includes(origin)) {
+      // 1. Exact match check against whitelisted items
+      const isExplicitlyAllowed = allowedOrigins.includes(origin);
+      
+      // 2. Dynamic check allowing any production/preview Vercel subdomain tier
+      const isVercelSubdomain = origin.endsWith('.vercel.app');
+
+      if (isExplicitlyAllowed || isVercelSubdomain) {
         return callback(null, true);
       }
 
-      // log blocked origins for debugging
+      // Log blocked origins for clean tracking in your Railway terminal
       console.log("❌ CORS Blocked:", origin);
-
       return callback(new Error("CORS policy violation"));
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -71,7 +75,10 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.error("🔥 Server Error:", err.message);
 
-  res.status(500).json({
+  // If a CORS error drops here, setting the status code to 403 prevents generic 500 crashes
+  const statusCode = err.message === "CORS policy violation" ? 403 : 500;
+
+  res.status(statusCode).json({
     success: false,
     message: err.message || "Internal Server Error"
   });
