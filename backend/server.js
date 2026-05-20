@@ -38,7 +38,7 @@ app.use(
         return callback(null, true);
       }
 
-      console.log("❌ Blocked by CORS:", origin);
+      console.log(" Blocked by CORS:", origin);
       return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
@@ -72,7 +72,7 @@ app.use((req, res) => {
 
 /* -------------------- ERROR HANDLER (IMPORTANT ADDITION) -------------------- */
 app.use((err, req, res, next) => {
-  console.error("🔥 Server Error:", err.message);
+  console.error(" Server Error:", err.message);
 
   res.status(500).json({
     success: false,
@@ -83,12 +83,12 @@ app.use((err, req, res, next) => {
 /* -------------------- START SERVER AFTER DB CONNECT -------------------- */
 AppDataSource.initialize()
   .then(() => {
-    console.log("✅ Database connected successfully");
+    console.log(" Database connected successfully");
 
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`Server running on port ${PORT}`);
     });
   })
   .catch((error) => {
-    console.error("❌ Database connection failed:", error);
+    console.error(" Database connection failed:", error);
   });
