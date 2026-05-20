@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { AuthContext } from './ContextInstances';
 
-// 🟢 Base API URL (Railway / Production / Local via env)
+//  Base API URL (Railway / Production / Local via env)
 const API = import.meta.env.VITE_API_URL;
 
 export const AuthProvider = ({ children }) => {
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
     checkToken();
   }, []);
 
-  // 🔐 LOGIN
+  //  LOGIN
   const login = async (username, password) => {
     try {
       const response = await fetch(`${API}/api/auth/login`, {
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 📝 REGISTER
+  //  REGISTER
   const register = async (username, password, name) => {
     try {
       const response = await fetch(`${API}/api/auth/register`, {
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 🚪 LOGOUT
+  //  LOGOUT
   const logout = () => {
     localStorage.removeItem('clinic_jwt_token');
     localStorage.removeItem('clinic_user_profile');
