@@ -14,32 +14,35 @@ export const AppDataSource = new DataSource({
   type: "postgres",
 
   // -----------------------------
-  // OPTION 1: Production (recommended)
+  // DATABASE URL (Prioritized for Railway)
   // -----------------------------
+  // If a full DATABASE_URL exists, TypeORM uses it automatically over individual fields
   url: process.env.DATABASE_URL,
 
   // -----------------------------
-  // OPTION 2: Local fallback
+  // Local Fallback Configs
   // -----------------------------
   host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT || "5432"),
+  port: parseInt(process.env.DB_PORT || "5432", 10),
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
 
   // -----------------------------
-  // CRITICAL FIX
+  // CRITICAL AUTO-GENERATE SCHEMA FIX
   // -----------------------------
-  synchronize: isProduction ? false : true,
+  // Force synchronization to true right now so it automatically builds 
+  // missing tables (like "users") on your live Railway instance.
+  synchronize: true, 
 
-  logging: false,
+  logging: isProduction ? false : true, // Useful to see generation logs locally
 
   entities: [UserEntity, DoctorEntity, AppointmentEntity],
   subscribers: [],
   migrations: [],
 
   // -----------------------------
-  // SSL FIX (for hosted DBs)
+  // SSL FIX (Required by Railway PostgreSQL)
   // -----------------------------
   ssl: isProduction
     ? { rejectUnauthorized: false }
