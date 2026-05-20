@@ -12,10 +12,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-/* -------------------- TRUST PROXY (important for Railway/Vercel) -------------------- */
+/* -------------------- TRUST PROXY (Railway/Vercel safety) -------------------- */
 app.set('trust proxy', 1);
 
-/* -------------------- CORS CONFIG (PRODUCTION SAFE) -------------------- */
+/* -------------------- CORS CONFIG -------------------- */
 const allowedOrigins = [
   process.env.CLIENT_URL,
   "http://localhost:5173",
@@ -25,23 +25,20 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow Postman / server-to-server requests
+      // allow REST tools like Postman
       if (!origin) return callback(null, true);
 
-      // Allow exact matches
+      // exact match check
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      // Allow any Vercel preview deployments
-      if (origin.endsWith(".vercel.app")) {
-        return callback(null, true);
-      }
+      // log blocked origins for debugging
+      console.log("❌ CORS Blocked:", origin);
 
-      console.log(" Blocked by CORS:", origin);
-      return callback(new Error("Not allowed by CORS"));
+      return callback(new Error("CORS policy violation"));
     },
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
   })
@@ -70,9 +67,9 @@ app.use((req, res) => {
   });
 });
 
-/* -------------------- ERROR HANDLER (IMPORTANT ADDITION) -------------------- */
+/* -------------------- GLOBAL ERROR HANDLER -------------------- */
 app.use((err, req, res, next) => {
-  console.error(" Server Error:", err.message);
+  console.error("🔥 Server Error:", err.message);
 
   res.status(500).json({
     success: false,
@@ -80,15 +77,15 @@ app.use((err, req, res, next) => {
   });
 });
 
-/* -------------------- START SERVER AFTER DB CONNECT -------------------- */
+/* -------------------- START SERVER -------------------- */
 AppDataSource.initialize()
   .then(() => {
-    console.log(" Database connected successfully");
+    console.log("✅ Database connected successfully");
 
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   })
   .catch((error) => {
-    console.error(" Database connection failed:", error);
+    console.error("❌ Database connection failed:", error);
   });
